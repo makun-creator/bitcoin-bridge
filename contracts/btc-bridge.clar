@@ -74,3 +74,34 @@
 )
 
 (define-map bridge-balances principal uint)
+
+;; ======================
+;; Read-Only Functions
+;; ======================
+
+(define-read-only (get-deposit (tx-hash (buff 32)))
+    (map-get? deposits {tx-hash: tx-hash})
+)
+
+(define-read-only (get-bridge-status)
+    (var-get bridge-paused)
+)
+
+(define-read-only (get-validator-status (validator principal))
+    (default-to false (map-get? validators validator))
+)
+
+(define-read-only (get-balance (user principal))
+    (default-to u0 (map-get? bridge-balances user))
+)
+
+(define-read-only (verify-signature (tx-hash (buff 32)) (validator principal) (signature (buff 65)))
+    (let (
+        (stored-sig (map-get? validator-signatures {tx-hash: tx-hash, validator: validator}))
+    )
+        (and 
+            (is-some stored-sig)
+            (is-eq signature (get signature (unwrap-panic stored-sig)))
+        )
+    )
+)
