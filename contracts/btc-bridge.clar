@@ -33,3 +33,44 @@
 (define-constant ERR-INVALID-BTC-ADDRESS (err u1009))
 (define-constant ERR-INVALID-TX-HASH (err u1010))
 (define-constant ERR-INVALID-SIGNATURE-FORMAT (err u1011))
+
+;; ======================
+;; Configuration
+;; ======================
+
+(define-constant CONTRACT-OWNER tx-sender)
+(define-constant MIN-DEPOSIT-AMOUNT u100000) ;; 0.001 BTC in sats
+(define-constant MAX-DEPOSIT-AMOUNT u1000000000) ;; 10 BTC in sats
+(define-constant REQUIRED-CONFIRMATIONS u6)
+
+;; ======================
+;; State Variables
+;; ======================
+
+(define-data-var bridge-paused bool false)
+(define-data-var total-bridged-amount uint u0)
+(define-data-var last-processed-height uint u0)
+
+;; ======================
+;; Data Maps
+;; ======================
+
+(define-map deposits 
+    { tx-hash: (buff 32) }
+    {
+        amount: uint,
+        recipient: principal,
+        processed: bool,
+        confirmations: uint,
+        timestamp: uint,
+        btc-sender: (buff 33)
+    }
+)
+
+(define-map validators principal bool)
+(define-map validator-signatures
+    { tx-hash: (buff 32), validator: principal }
+    { signature: (buff 65), timestamp: uint }
+)
+
+(define-map bridge-balances principal uint)
